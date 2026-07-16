@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_182135) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_182553) do
   create_table "bookmarks", force: :cascade do |t|
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "favicon_url"
     t.boolean "favorite", default: false, null: false
     t.datetime "last_visited_at"
     t.string "title"

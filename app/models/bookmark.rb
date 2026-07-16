@@ -29,6 +29,7 @@ class Bookmark < ApplicationRecord
 
   before_save :apply_tag_list
   after_commit -> { Tag.prune_orphaned(user) }, on: %i[ update destroy ]
+  after_create_commit :fetch_metadata_later
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
   scope :tagged_with, ->(name) { joins(:tags).where(tags: { name: Tag.normalize_value_for(:name, name.to_s) }) }
@@ -109,6 +110,10 @@ class Bookmark < ApplicationRecord
 
       self.tags = parsed_tag_names.map { |name| user.tags.find_or_create_by!(name: name) }
       @tag_list = nil
+    end
+
+    def fetch_metadata_later
+      FetchBookmarkMetadataJob.perform_later(self)
     end
 
     def url_must_be_http
