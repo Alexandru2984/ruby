@@ -81,6 +81,15 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "index filters by tag" do
+    tagged = users(:one).bookmarks.create!(url: "https://example.com/tagged", tag_list: "ruby")
+
+    get bookmarks_url(tag: "ruby")
+    assert_response :success
+    assert_select "a[href=?]", bookmark_path(tagged)
+    assert_select "a[href=?]", bookmark_path(bookmarks(:one)), count: 0
+  end
+
   test "index only lists current user's bookmarks" do
     get bookmarks_url
     assert_response :success

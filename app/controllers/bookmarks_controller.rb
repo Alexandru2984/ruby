@@ -3,7 +3,8 @@ class BookmarksController < ApplicationController
 
   # GET /bookmarks or /bookmarks.json
   def index
-    @bookmarks = Current.user.bookmarks.newest_first
+    @bookmarks = Current.user.bookmarks.newest_first.includes(:tags)
+    @bookmarks = @bookmarks.tagged_with(params[:tag]) if params[:tag].present?
   end
 
   # GET /bookmarks/1 or /bookmarks/1.json
@@ -65,6 +66,6 @@ class BookmarksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def bookmark_params
-      params.expect(bookmark: [ :title, :url, :description ])
+      params.expect(bookmark: [ :title, :url, :description, :tag_list ])
     end
 end

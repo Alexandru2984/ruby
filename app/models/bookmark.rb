@@ -1,5 +1,9 @@
 class Bookmark < ApplicationRecord
+  MAX_TAGS = 20
+
   belongs_to :user
+  has_many :taggings, dependent: :destroy
+  has_many :tags, through: :taggings
 
   normalizes :url, with: ->(url) {
     url = url.strip
@@ -21,8 +25,22 @@ class Bookmark < ApplicationRecord
   validates :title, length: { maximum: 255 }
   validates :description, length: { maximum: 2000 }
   validate :url_must_be_http
+  validate :tag_list_within_limits
+
+  before_save :apply_tag_list
+  after_commit -> { Tag.prune_orphaned(user) }, on: %i[ update destroy ]
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
+  scope :tagged_with, ->(name) { joins(:tags).where(tags: { name: Tag.normalize_value_for(:name, name.to_s) }) }
+
+  # Comma-separated tag names, used as a virtual form attribute.
+  def tag_list
+    @tag_list || tags.sort_by(&:name).map(&:name).join(", ")
+  end
+
+  def tag_list=(value)
+    @tag_list = value
+  end
 
   # What to show when the page title hasn't been set (yet).
   def display_title
@@ -36,6 +54,25 @@ class Bookmark < ApplicationRecord
   end
 
   private
+    def parsed_tag_names
+      @tag_list.to_s.split(",").map { |name| Tag.normalize_value_for(:name, name) }.reject(&:blank?).uniq
+    end
+
+    def tag_list_within_limits
+      return if @tag_list.nil?
+
+      names = parsed_tag_names
+      errors.add(:tag_list, "can have at most #{MAX_TAGS} tags") if names.size > MAX_TAGS
+      errors.add(:tag_list, "tags must be #{Tag::NAME_MAX_LENGTH} characters or fewer") if names.any? { |name| name.length > Tag::NAME_MAX_LENGTH }
+    end
+
+    def apply_tag_list
+      return if @tag_list.nil?
+
+      self.tags = parsed_tag_names.map { |name| user.tags.find_or_create_by!(name: name) }
+      @tag_list = nil
+    end
+
     def url_must_be_http
       return if url.blank?
 

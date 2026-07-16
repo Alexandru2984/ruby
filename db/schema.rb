@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_181431) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_181901) do
   create_table "bookmarks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -32,6 +32,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_181431) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "taggings", force: :cascade do |t|
+    t.integer "bookmark_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "tag_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bookmark_id", "tag_id"], name: "index_taggings_on_bookmark_id_and_tag_id", unique: true
+    t.index ["bookmark_id"], name: "index_taggings_on_bookmark_id"
+    t.index ["tag_id"], name: "index_taggings_on_tag_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id", "name"], name: "index_tags_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_tags_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
@@ -42,4 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_181431) do
 
   add_foreign_key "bookmarks", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "taggings", "bookmarks"
+  add_foreign_key "taggings", "tags"
+  add_foreign_key "tags", "users"
 end

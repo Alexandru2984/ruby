@@ -54,6 +54,38 @@ class BookmarkTest < ActiveSupport::TestCase
     assert bookmark.valid?
   end
 
+  test "assigns tags from a comma-separated tag_list" do
+    bookmark = @user.bookmarks.create!(url: "https://example.com/tagged", tag_list: "Ruby, rails,  Ruby ")
+    assert_equal %w[rails ruby], bookmark.tags.map(&:name).sort
+  end
+
+  test "reuses existing tags instead of duplicating them" do
+    existing = @user.tags.create!(name: "ruby")
+    bookmark = @user.bookmarks.create!(url: "https://example.com/reuse", tag_list: "ruby")
+    assert_equal [ existing.id ], bookmark.tag_ids
+  end
+
+  test "replacing tag_list prunes tags that are no longer used" do
+    bookmark = @user.bookmarks.create!(url: "https://example.com/prune", tag_list: "old-tag")
+    bookmark.update!(tag_list: "new-tag")
+
+    assert_equal %w[new-tag], bookmark.reload.tags.map(&:name)
+    assert_not @user.tags.exists?(name: "old-tag")
+  end
+
+  test "rejects more than MAX_TAGS tags" do
+    list = (1..Bookmark::MAX_TAGS + 1).map { |i| "tag#{i}" }.join(",")
+    bookmark = @user.bookmarks.new(url: "https://example.com/too-many", tag_list: list)
+    assert_not bookmark.valid?
+    assert bookmark.errors[:tag_list].any?
+  end
+
+  test "tagged_with matches normalized tag names" do
+    bookmark = @user.bookmarks.create!(url: "https://example.com/find-me", tag_list: "ruby")
+    assert_includes @user.bookmarks.tagged_with(" Ruby "), bookmark
+    assert_empty @user.bookmarks.tagged_with("missing")
+  end
+
   test "display_title falls back to host when title is blank" do
     bookmark = @user.bookmarks.new(url: "https://example.com/deep/path")
     assert_equal "example.com", bookmark.display_title
