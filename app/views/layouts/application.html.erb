@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full">
   <head>
     <title><%= content_for(:title) || "Bookmarks" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -25,9 +25,35 @@
     <script defer src="https://analytics.micutu.com/script.js" data-website-id="e0e6f3ef-739a-4c5c-9d13-e7c48bba8a80"></script>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased">
+    <header class="sticky top-0 z-10 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
+      <div class="container mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <%= link_to root_path, class: "flex items-center gap-2 font-bold text-lg" do %>
+          <span class="inline-flex w-7 h-7 items-center justify-center rounded-lg bg-blue-600 text-white text-sm">B</span>
+          Bookmarks
+        <% end %>
+
+        <nav class="flex items-center gap-2 text-sm">
+          <% if authenticated? %>
+            <%= link_to "New bookmark", new_bookmark_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+            <%= link_to "Import", new_import_path, class: "hidden sm:inline rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
+            <span class="hidden md:inline text-zinc-400 dark:text-zinc-500 px-1 truncate max-w-48"><%= Current.user.email_address %></span>
+            <%= button_to "Sign out", session_path, method: :delete, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium cursor-pointer" %>
+          <% else %>
+            <%= link_to "Sign in", new_session_path, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
+            <%= link_to "Sign up", new_registration_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container mx-auto max-w-5xl px-4 sm:px-6 py-8 flex-1 w-full">
+      <%= render "shared/flash" %>
       <%= yield %>
     </main>
+
+    <footer class="py-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
+      Bookmarks · self-hosted with Ruby on Rails
+    </footer>
   </body>
 </html>

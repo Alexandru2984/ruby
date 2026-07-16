@@ -1,9 +1,9 @@
 <%= form_with(model: bookmark, class: "contents") do |form| %>
   <% if bookmark.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+    <div id="error_explanation" class="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300 px-4 py-3 font-medium rounded-lg mt-5">
       <h2><%= pluralize(bookmark.errors.count, "error") %> prohibited this bookmark from being saved:</h2>
 
-      <ul class="list-disc ml-6">
+      <ul class="list-disc ml-6 mt-1 font-normal">
         <% bookmark.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -12,27 +12,28 @@
   <% end %>
 
   <div class="my-5">
-    <%= form.label :title %>
-    <%= form.text_field :title, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": bookmark.errors[:title].none?, "border-red-400 focus:outline-red-600": bookmark.errors[:title].any?}] %>
+    <%= form.label :url, class: "block text-sm font-medium" %>
+    <%= form.text_field :url, required: true, autofocus: bookmark.new_record?, placeholder: "https://example.com/article", class: input_classes(errored: bookmark.errors[:url].any?) %>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">The only required field — title and description are fetched automatically if left blank.</p>
   </div>
 
   <div class="my-5">
-    <%= form.label :url %>
-    <%= form.text_field :url, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": bookmark.errors[:url].none?, "border-red-400 focus:outline-red-600": bookmark.errors[:url].any?}] %>
+    <%= form.label :title, class: "block text-sm font-medium" %>
+    <%= form.text_field :title, class: input_classes(errored: bookmark.errors[:title].any?) %>
   </div>
 
   <div class="my-5">
-    <%= form.label :description %>
-    <%= form.textarea :description, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": bookmark.errors[:description].none?, "border-red-400 focus:outline-red-600": bookmark.errors[:description].any?}] %>
+    <%= form.label :description, class: "block text-sm font-medium" %>
+    <%= form.textarea :description, rows: 4, class: input_classes(errored: bookmark.errors[:description].any?) %>
   </div>
 
   <div class="my-5">
-    <%= form.label :tag_list, "Tags" %>
-    <%= form.text_field :tag_list, placeholder: "rails, ruby, reading-list", class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": bookmark.errors[:tag_list].none?, "border-red-400 focus:outline-red-600": bookmark.errors[:tag_list].any?}] %>
-    <p class="text-sm text-gray-500 mt-1">Separate tags with commas.</p>
+    <%= form.label :tag_list, "Tags", class: "block text-sm font-medium" %>
+    <%= form.text_field :tag_list, placeholder: "rails, ruby, reading-list", class: input_classes(errored: bookmark.errors[:tag_list].any?) %>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Separate tags with commas.</p>
   </div>
 
   <div class="inline">
-    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= form.submit class: "w-full sm:w-auto #{button_classes(:primary)}" %>
   </div>
 <% end %>

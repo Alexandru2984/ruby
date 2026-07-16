@@ -1,13 +1,13 @@
 <% if pagy.pages > 1 %>
   <nav class="flex items-center justify-center gap-4 mt-8 text-sm" aria-label="Pagination">
     <% if pagy.prev %>
-      <%= link_to "← Previous", url_for(request.query_parameters.merge("page" => pagy.prev)), class: "rounded-md px-3 py-2 bg-gray-100 hover:bg-gray-50 font-medium" %>
+      <%= link_to "← Previous", url_for(request.query_parameters.merge("page" => pagy.prev)), class: "rounded-md px-3 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium" %>
     <% end %>
 
-    <span class="text-gray-500">Page <%= pagy.page %> of <%= pagy.pages %></span>
+    <span class="text-zinc-500 dark:text-zinc-400">Page <%= pagy.page %> of <%= pagy.pages %></span>
 
     <% if pagy.next %>
-      <%= link_to "Next →", url_for(request.query_parameters.merge("page" => pagy.next)), class: "rounded-md px-3 py-2 bg-gray-100 hover:bg-gray-50 font-medium" %>
+      <%= link_to "Next →", url_for(request.query_parameters.merge("page" => pagy.next)), class: "rounded-md px-3 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium" %>
     <% end %>
   </nav>
 <% end %>
