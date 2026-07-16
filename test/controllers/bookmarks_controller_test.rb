@@ -23,12 +23,21 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "should create bookmark" do
-    assert_difference("Bookmark.count") do
-      post bookmarks_url, params: { bookmark: { description: @bookmark.description, title: @bookmark.title, url: @bookmark.url } }
+  test "should create bookmark owned by current user" do
+    assert_difference("users(:one).bookmarks.count") do
+      post bookmarks_url, params: { bookmark: { description: "A brand new find", title: "New", url: "https://example.com/fresh" } }
     end
 
     assert_redirected_to bookmark_url(Bookmark.last)
+    assert_equal users(:one), Bookmark.last.user
+  end
+
+  test "does not create bookmark with invalid url" do
+    assert_no_difference("Bookmark.count") do
+      post bookmarks_url, params: { bookmark: { url: "javascript:alert(1)" } }
+    end
+
+    assert_response :unprocessable_entity
   end
 
   test "should show bookmark" do
@@ -52,5 +61,30 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to bookmarks_url
+  end
+
+  test "cannot see another user's bookmark" do
+    get bookmark_url(bookmarks(:two))
+    assert_response :not_found
+  end
+
+  test "cannot update another user's bookmark" do
+    patch bookmark_url(bookmarks(:two)), params: { bookmark: { title: "hijacked" } }
+    assert_response :not_found
+    assert_equal "Hotwire", bookmarks(:two).reload.title
+  end
+
+  test "cannot destroy another user's bookmark" do
+    assert_no_difference("Bookmark.count") do
+      delete bookmark_url(bookmarks(:two))
+    end
+    assert_response :not_found
+  end
+
+  test "index only lists current user's bookmarks" do
+    get bookmarks_url
+    assert_response :success
+    assert_select "a[href=?]", bookmark_path(bookmarks(:one))
+    assert_select "a[href=?]", bookmark_path(bookmarks(:two)), count: 0
   end
 end

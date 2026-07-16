@@ -1,11 +1,11 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  title: MyString
-  url: MyString
-  description: MyText
+  user: one
+  title: Rails Guides
+  url: https://guides.rubyonrails.org/
+  description: Official Ruby on Rails documentation and guides.
 
 two:
-  title: MyString
-  url: MyString
-  description: MyText
+  user: two
+  title: Hotwire
+  url: https://hotwired.dev/
+  description: HTML over the wire.

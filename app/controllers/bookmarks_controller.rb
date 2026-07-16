@@ -3,7 +3,7 @@ class BookmarksController < ApplicationController
 
   # GET /bookmarks or /bookmarks.json
   def index
-    @bookmarks = Bookmark.all
+    @bookmarks = Current.user.bookmarks.newest_first
   end
 
   # GET /bookmarks/1 or /bookmarks/1.json
@@ -21,7 +21,7 @@ class BookmarksController < ApplicationController
 
   # POST /bookmarks or /bookmarks.json
   def create
-    @bookmark = Bookmark.new(bookmark_params)
+    @bookmark = Current.user.bookmarks.new(bookmark_params)
 
     respond_to do |format|
       if @bookmark.save
@@ -60,7 +60,7 @@ class BookmarksController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_bookmark
-      @bookmark = Bookmark.find(params.expect(:id))
+      @bookmark = Current.user.bookmarks.find(params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.

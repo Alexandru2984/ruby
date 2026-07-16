@@ -10,13 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_181030) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_181431) do
   create_table "bookmarks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
     t.string "title"
     t.datetime "updated_at", null: false
-    t.string "url"
+    t.string "url", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id", "created_at"], name: "index_bookmarks_on_user_id_and_created_at"
+    t.index ["user_id", "url"], name: "index_bookmarks_on_user_id_and_url", unique: true
+    t.index ["user_id"], name: "index_bookmarks_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -36,5 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_181030) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "bookmarks", "users"
   add_foreign_key "sessions", "users"
 end
