@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Ruby On Rails" %></title>
+    <title><%= content_for(:title) || "Bookmarks" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="A fast, self-hosted bookmark manager.">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Ruby On Rails">
+    <meta name="application-name" content="Bookmarks">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -21,6 +22,7 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <script defer src="https://analytics.micutu.com/script.js" data-website-id="e0e6f3ef-739a-4c5c-9d13-e7c48bba8a80"></script>
   </head>
 
   <body>
