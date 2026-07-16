@@ -1,4 +1,9 @@
 module ApplicationHelper
+  # Opens a small "save bookmark" window prefilled with the current page.
+  def bookmarklet_javascript
+    "javascript:void(window.open('#{new_bookmark_url}?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title),'_blank','width=640,height=720,noopener'))"
+  end
+
   def input_classes(errored: false)
     [
       "block w-full rounded-md border px-3 py-2 mt-2 shadow-sm bg-white dark:bg-zinc-900",

@@ -21,9 +21,9 @@ class BookmarksController < ApplicationController
   def show
   end
 
-  # GET /bookmarks/new
+  # GET /bookmarks/new — url/title can be prefilled, e.g. by the bookmarklet.
   def new
-    @bookmark = Bookmark.new
+    @bookmark = Current.user.bookmarks.new(url: params[:url], title: params[:title])
   end
 
   # GET /bookmarks/1/edit

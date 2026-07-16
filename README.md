@@ -29,6 +29,11 @@ fetched in the background, everything is tagged, searchable and yours.
 - **UI** — server-rendered Hotwire UI with Turbo Streams (favorite toggle),
   Stimulus (clipboard copy, dismissible flash), Tailwind CSS with automatic
   dark mode, contextual empty states.
+- **Bookmarklet** — a drag-to-toolbar "Save to Bookmarks" button (on the
+  Settings page) that opens a prefilled save window from any page.
+- **JSON API** — token-authenticated `/api/v1` for browser extensions and
+  scripts: list/search/create/delete bookmarks, per-token rate limiting,
+  tokens managed (generate/regenerate/revoke) from the Settings page.
 
 ## Stack
 
@@ -67,6 +72,38 @@ bin/brakeman            # static security analysis
 bin/bundler-audit       # known-vulnerable gems
 bin/ci                  # everything CI runs
 ```
+
+## API
+
+Generate a token on the Settings page, then:
+
+```bash
+# List (supports q, tag, filter=favorites|archived|all, sort, page)
+curl -H "Authorization: Bearer $TOKEN" https://your-host/api/v1/bookmarks
+
+# Save (title/description/favicon are fetched in the background if omitted)
+curl -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     -d '{"bookmark":{"url":"example.com/article","tag_list":"reading, later"}}' \
+     https://your-host/api/v1/bookmarks
+
+# Delete
+curl -X DELETE -H "Authorization: Bearer $TOKEN" https://your-host/api/v1/bookmarks/1
+```
+
+Responses are JSON; errors come back as `{ "error": … }` or
+`{ "errors": [...] }` with conventional status codes (401/404/422/429).
+
+## Configuration
+
+All optional, via environment variables:
+
+| Variable | Purpose |
+| -------- | ------- |
+| `APP_HOST` | Host used in mailer links (default `ruby.micutu.com`) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Outgoing email; without `SMTP_HOST`, password reset mails are not delivered |
+| `MAILER_FROM` | From address for outgoing email |
+| `DISABLE_SIGNUPS` | Set to any value to close registration (existing users unaffected) |
+| `SOLID_QUEUE_IN_PUMA` | Run background jobs inside Puma (single-server setups) |
 
 ## Architecture notes
 

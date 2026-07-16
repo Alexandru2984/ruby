@@ -14,6 +14,14 @@ Rails.application.routes.draw do
     end
   end
   resource :import, only: %i[ new create ]
+  resource :settings, only: :show
+  resource :api_token, only: %i[ create destroy ]
+
+  namespace :api do
+    namespace :v1 do
+      resources :bookmarks, only: %i[ index show create destroy ]
+    end
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -23,6 +23,13 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new prefills url and title from bookmarklet params" do
+    get new_bookmark_url(url: "https://example.com/from-bookmarklet", title: "From Bookmarklet")
+    assert_response :success
+    assert_select "input[name='bookmark[url]'][value=?]", "https://example.com/from-bookmarklet"
+    assert_select "input[name='bookmark[title]'][value=?]", "From Bookmarklet"
+  end
+
   test "should create bookmark owned by current user" do
     assert_difference("users(:one).bookmarks.count") do
       post bookmarks_url, params: { bookmark: { description: "A brand new find", title: "New", url: "https://example.com/fresh" } }

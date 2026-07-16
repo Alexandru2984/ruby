@@ -37,11 +37,13 @@
           <% if authenticated? %>
             <%= link_to "New bookmark", new_bookmark_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
             <%= link_to "Import", new_import_path, class: "hidden sm:inline rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
-            <span class="hidden md:inline text-zinc-400 dark:text-zinc-500 px-1 truncate max-w-48"><%= Current.user.email_address %></span>
+            <%= link_to "Settings", settings_path, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium cursor-pointer" %>
           <% else %>
             <%= link_to "Sign in", new_session_path, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
-            <%= link_to "Sign up", new_registration_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+            <% if signups_enabled? %>
+              <%= link_to "Sign up", new_registration_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+            <% end %>
           <% end %>
         </nav>
       </div>
