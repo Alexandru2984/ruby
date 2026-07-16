@@ -36,6 +36,7 @@ class Bookmark < ApplicationRecord
   scope :favorites, -> { where(favorite: true) }
   scope :active, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }
+  scope :broken, -> { where(link_status: "broken") }
 
   SORTS = %w[newest oldest title most_visited].freeze
 
@@ -56,6 +57,10 @@ class Bookmark < ApplicationRecord
 
   def archived?
     archived_at.present?
+  end
+
+  def link_broken?
+    link_status == "broken"
   end
 
   def archive!

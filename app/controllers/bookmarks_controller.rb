@@ -8,6 +8,7 @@ class BookmarksController < ApplicationController
     scope = case params[:filter]
     when "archived"  then scope.archived
     when "favorites" then scope.active.favorites
+    when "broken"    then scope.active.broken
     else scope.active
     end
 
@@ -65,6 +66,31 @@ class BookmarksController < ApplicationController
     respond_to do |format|
       format.html { redirect_to bookmarks_path, notice: "Bookmark was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
+    end
+  end
+
+  # POST /bookmarks/bulk — applies one action to all selected bookmarks.
+  def bulk
+    selected = Current.user.bookmarks.where(id: Array(params[:ids]))
+
+    if selected.none?
+      return redirect_back fallback_location: bookmarks_path, status: :see_other, alert: "No bookmarks selected."
+    end
+
+    subject = "#{selected.count} #{"bookmark".pluralize(selected.count)}"
+
+    notice = case params[:bulk_action]
+    when "archive"    then selected.update_all(archived_at: Time.current, updated_at: Time.current) && "Archived #{subject}."
+    when "unarchive"  then selected.update_all(archived_at: nil, updated_at: Time.current) && "Restored #{subject}."
+    when "favorite"   then selected.update_all(favorite: true, updated_at: Time.current) && "Favorited #{subject}."
+    when "unfavorite" then selected.update_all(favorite: false, updated_at: Time.current) && "Unfavorited #{subject}."
+    when "delete"     then selected.destroy_all && "Deleted #{subject}."
+    end
+
+    if notice
+      redirect_back fallback_location: bookmarks_path, status: :see_other, notice: notice
+    else
+      redirect_back fallback_location: bookmarks_path, status: :see_other, alert: "Unknown bulk action."
     end
   end
 

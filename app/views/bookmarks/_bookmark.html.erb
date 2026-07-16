@@ -1,4 +1,9 @@
 <div id="<%= dom_id bookmark %>" class="flex gap-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
+  <% if local_assigns.fetch(:selectable, false) %>
+    <input type="checkbox" name="ids[]" value="<%= bookmark.id %>" form="bulk-form" aria-label="Select bookmark"
+           data-action="selection#refresh" data-selection-target="checkbox"
+           class="mt-2 size-4 shrink-0 accent-blue-600 cursor-pointer">
+  <% end %>
   <div class="shrink-0 mt-0.5">
     <% if bookmark.favicon_url.present? %>
       <img src="<%= bookmark.favicon_url %>" alt="" width="32" height="32" loading="lazy" class="w-8 h-8 rounded" onerror="this.style.display='none'">
@@ -23,6 +28,7 @@
       <% if bookmark.visits_count.positive? %> · <%= pluralize(bookmark.visits_count, "visit") %><% end %>
       · added <%= time_ago_in_words(bookmark.created_at) %> ago
       <% if bookmark.archived? %> · <span class="text-amber-600 dark:text-amber-500 font-medium">archived</span><% end %>
+      <% if bookmark.link_broken? %> · <span class="text-red-600 dark:text-red-400 font-medium" title="Last check failed<%= " on #{bookmark.link_checked_at.to_date}" if bookmark.link_checked_at %>">link broken</span><% end %>
     </p>
 
     <% if bookmark.description.present? %>

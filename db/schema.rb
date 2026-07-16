@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_185026) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_192326) do
   create_table "bookmarks", force: :cascade do |t|
     t.datetime "archived_at"
     t.datetime "created_at", null: false
@@ -18,6 +18,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_185026) do
     t.string "favicon_url"
     t.boolean "favorite", default: false, null: false
     t.datetime "last_visited_at"
+    t.datetime "link_checked_at"
+    t.string "link_status"
     t.string "title"
     t.datetime "updated_at", null: false
     t.string "url", null: false
@@ -61,9 +63,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_185026) do
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.string "password_digest", null: false
+    t.string "public_token"
     t.datetime "updated_at", null: false
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["public_token"], name: "index_users_on_public_token", unique: true
   end
 
   add_foreign_key "bookmarks", "users"

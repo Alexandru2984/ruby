@@ -34,6 +34,13 @@ fetched in the background, everything is tagged, searchable and yours.
 - **JSON API** — token-authenticated `/api/v1` for browser extensions and
   scripts: list/search/create/delete bookmarks, per-token rate limiting,
   tokens managed (generate/regenerate/revoke) from the Settings page.
+- **Dead link detection** — a recurring Solid Queue job checks every active
+  bookmark daily (HEAD with GET fallback, SSRF-guarded) and flags broken
+  ones with a badge and a dedicated filter.
+- **Bulk actions** — select any number of bookmarks and favorite, archive,
+  restore or delete them in one go.
+- **Public sharing** — opt-in secret link (`/shared/:token`) exposing your
+  favorites read-only; rotate or disable the link at any time.
 
 ## Stack
 

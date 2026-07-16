@@ -59,6 +59,31 @@
   </section>
 
   <section class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+    <h2 class="font-semibold text-lg">Public sharing</h2>
+    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+      Share your ★ favorites (excluding archived ones) with anyone through a
+      secret read-only link. Turning sharing off or regenerating kills the old link.
+    </p>
+
+    <% if Current.user.sharing_enabled? %>
+      <div class="mt-4 flex items-center gap-2">
+        <code class="font-mono text-sm bg-zinc-100 dark:bg-zinc-800 rounded-md px-3 py-2 break-all"><%= shared_bookmarks_url(token: Current.user.public_token) %></code>
+        <button type="button" data-controller="clipboard" data-clipboard-text-value="<%= shared_bookmarks_url(token: Current.user.public_token) %>" data-action="clipboard#copy"
+                class="shrink-0 rounded-md px-2 py-1 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium cursor-pointer">Copy</button>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <%= button_to "Regenerate link", public_share_path, method: :post, data: { turbo_confirm: "The current link will stop working. Continue?" }, class: button_classes(:secondary) %>
+        <%= button_to "Turn off", public_share_path, method: :delete, data: { turbo_confirm: "Disable public sharing?" }, class: button_classes(:danger) %>
+      </div>
+    <% else %>
+      <div class="mt-4">
+        <%= button_to "Enable public sharing", public_share_path, method: :post, class: button_classes(:primary) %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
     <h2 class="font-semibold text-lg">Your data</h2>
     <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
       Everything you save here is yours to take anywhere.

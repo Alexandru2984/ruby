@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :bookmarks do
     collection do
       get :export
+      post :bulk
     end
     member do
       get :visit
@@ -16,6 +17,8 @@ Rails.application.routes.draw do
   resource :import, only: %i[ new create ]
   resource :settings, only: :show
   resource :api_token, only: %i[ create destroy ]
+  resource :public_share, only: %i[ create destroy ]
+  get "shared/:token" => "shared_bookmarks#show", as: :shared_bookmarks
 
   namespace :api do
     namespace :v1 do

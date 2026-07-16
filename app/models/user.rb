@@ -11,4 +11,17 @@ class User < ApplicationRecord
                             uniqueness: { case_sensitive: false },
                             format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8, maximum: 72 }, allow_nil: true
+
+  # Public sharing is opt-in: no token means nothing is exposed.
+  def sharing_enabled?
+    public_token.present?
+  end
+
+  def enable_public_sharing!
+    update!(public_token: self.class.generate_unique_secure_token)
+  end
+
+  def disable_public_sharing!
+    update!(public_token: nil)
+  end
 end

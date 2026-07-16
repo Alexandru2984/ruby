@@ -1,6 +1,6 @@
 <% content_for :title, "Bookmarks" %>
 
-<div class="w-full">
+<div class="w-full" data-controller="selection">
   <div class="flex flex-wrap justify-between items-center gap-3">
     <h1 class="font-bold text-3xl">Bookmarks</h1>
 
@@ -29,6 +29,7 @@
     <%= link_to "All", bookmarks_path(tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter].blank? ? "bg-blue-600 text-white" : "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"] %>
     <%= link_to "Favorites", bookmarks_path(filter: "favorites", tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter] == "favorites" ? "bg-blue-600 text-white" : "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"] %>
     <%= link_to "Archived", bookmarks_path(filter: "archived", tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter] == "archived" ? "bg-blue-600 text-white" : "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"] %>
+    <%= link_to "Broken", bookmarks_path(filter: "broken", tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter] == "broken" ? "bg-blue-600 text-white" : "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"] %>
 
     <% if params[:tag].present? %>
       <span class="rounded-full px-3 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
@@ -44,7 +45,7 @@
 
   <div id="bookmarks" class="mt-6 space-y-4">
     <% if @bookmarks.any? %>
-      <%= render @bookmarks %>
+      <%= render partial: "bookmark", collection: @bookmarks, locals: { selectable: true } %>
     <% elsif params[:q].present? || params[:tag].present? || params[:filter].present? %>
       <div class="text-center py-16 text-zinc-500 dark:text-zinc-400">
         <p class="text-lg font-medium">Nothing matches those filters.</p>
@@ -61,6 +62,24 @@
         </div>
       </div>
     <% end %>
+  </div>
+
+  <div hidden data-selection-target="bar"
+       class="sticky bottom-4 mt-6 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 shadow-lg">
+    <span class="text-sm font-medium px-2"><span data-selection-target="count">0</span> selected</span>
+
+    <%= form_with url: bulk_bookmarks_path, method: :post, id: "bulk-form", class: "flex flex-wrap items-center gap-2 text-sm" do %>
+      <button type="submit" name="bulk_action" value="favorite" class="rounded-md px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium cursor-pointer">★ Favorite</button>
+      <button type="submit" name="bulk_action" value="unfavorite" class="rounded-md px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium cursor-pointer">Unfavorite</button>
+      <% if params[:filter] == "archived" %>
+        <button type="submit" name="bulk_action" value="unarchive" class="rounded-md px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium cursor-pointer">Restore</button>
+      <% else %>
+        <button type="submit" name="bulk_action" value="archive" class="rounded-md px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-medium cursor-pointer">Archive</button>
+      <% end %>
+      <button type="submit" name="bulk_action" value="delete" data-turbo-confirm="Permanently delete the selected bookmarks?" class="rounded-md px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 font-medium cursor-pointer">Delete</button>
+    <% end %>
+
+    <button type="button" data-action="selection#clear" class="ml-auto rounded-md px-3 py-1.5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium cursor-pointer text-sm">Clear</button>
   </div>
 
   <%= render "shared/pagination", pagy: @pagy %>

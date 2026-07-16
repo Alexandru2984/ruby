@@ -161,6 +161,40 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", bookmark_path(bookmarks(:one)), count: 0
   end
 
+  test "bulk archive affects only selected own bookmarks" do
+    mine = users(:one).bookmarks.create!(url: "https://example.com/bulk-me")
+    foreign = bookmarks(:two)
+
+    post bulk_bookmarks_url, params: { bulk_action: "archive", ids: [ mine.id, foreign.id ] }
+
+    assert_redirected_to bookmarks_url
+    assert mine.reload.archived?
+    assert_not foreign.reload.archived?
+    assert_not @bookmark.reload.archived?
+  end
+
+  test "bulk favorite and delete" do
+    other = users(:one).bookmarks.create!(url: "https://example.com/bulk-two")
+
+    post bulk_bookmarks_url, params: { bulk_action: "favorite", ids: [ @bookmark.id, other.id ] }
+    assert @bookmark.reload.favorite?
+    assert other.reload.favorite?
+
+    assert_difference("Bookmark.count", -2) do
+      post bulk_bookmarks_url, params: { bulk_action: "delete", ids: [ @bookmark.id, other.id ] }
+    end
+  end
+
+  test "bulk with no selection or unknown action redirects with alert" do
+    post bulk_bookmarks_url, params: { bulk_action: "archive", ids: [] }
+    assert_redirected_to bookmarks_url
+    assert_equal "No bookmarks selected.", flash[:alert]
+
+    post bulk_bookmarks_url, params: { bulk_action: "explode", ids: [ @bookmark.id ] }
+    assert_equal "Unknown bulk action.", flash[:alert]
+    assert Bookmark.exists?(@bookmark.id)
+  end
+
   test "export downloads only the current user's bookmarks" do
     get export_bookmarks_url(format: :json)
     assert_response :success
