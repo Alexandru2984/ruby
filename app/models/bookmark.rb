@@ -32,6 +32,27 @@ class Bookmark < ApplicationRecord
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
   scope :tagged_with, ->(name) { joins(:tags).where(tags: { name: Tag.normalize_value_for(:name, name.to_s) }) }
+  scope :favorites, -> { where(favorite: true) }
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
+  def archived?
+    archived_at.present?
+  end
+
+  def archive!
+    update!(archived_at: Time.current)
+  end
+
+  def unarchive!
+    update!(archived_at: nil)
+  end
+
+  # Counts a click-through without bumping updated_at; atomic in SQL so
+  # concurrent visits don't lose increments.
+  def register_visit!
+    self.class.where(id: id).update_all([ "visits_count = visits_count + 1, last_visited_at = ?", Time.current ])
+  end
 
   # Comma-separated tag names, used as a virtual form attribute.
   def tag_list

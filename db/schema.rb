@@ -10,14 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_181901) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_182135) do
   create_table "bookmarks", force: :cascade do |t|
+    t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.text "description"
+    t.boolean "favorite", default: false, null: false
+    t.datetime "last_visited_at"
     t.string "title"
     t.datetime "updated_at", null: false
     t.string "url", null: false
     t.integer "user_id", null: false
+    t.integer "visits_count", default: 0, null: false
     t.index ["user_id", "created_at"], name: "index_bookmarks_on_user_id_and_created_at"
     t.index ["user_id", "url"], name: "index_bookmarks_on_user_id_and_url", unique: true
     t.index ["user_id"], name: "index_bookmarks_on_user_id"

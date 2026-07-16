@@ -86,6 +86,31 @@ class BookmarkTest < ActiveSupport::TestCase
     assert_empty @user.bookmarks.tagged_with("missing")
   end
 
+  test "register_visit! increments visits without touching updated_at" do
+    bookmark = bookmarks(:one)
+    original_updated_at = bookmark.updated_at
+
+    bookmark.register_visit!
+    bookmark.reload
+
+    assert_equal 1, bookmark.visits_count
+    assert_not_nil bookmark.last_visited_at
+    assert_equal original_updated_at.to_i, bookmark.updated_at.to_i
+  end
+
+  test "archive! and unarchive! toggle archived state" do
+    bookmark = bookmarks(:one)
+    assert_not bookmark.archived?
+
+    bookmark.archive!
+    assert bookmark.archived?
+    assert_includes Bookmark.archived, bookmark
+    assert_not_includes Bookmark.active, bookmark
+
+    bookmark.unarchive!
+    assert_not bookmark.archived?
+  end
+
   test "display_title falls back to host when title is blank" do
     bookmark = @user.bookmarks.new(url: "https://example.com/deep/path")
     assert_equal "example.com", bookmark.display_title

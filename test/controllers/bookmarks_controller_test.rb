@@ -63,6 +63,36 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to bookmarks_url
   end
 
+  test "visit counts the click-through and redirects to the target url" do
+    assert_changes -> { @bookmark.reload.visits_count }, from: 0, to: 1 do
+      get visit_bookmark_url(@bookmark)
+    end
+
+    assert_redirected_to @bookmark.url
+    assert_not_nil @bookmark.reload.last_visited_at
+  end
+
+  test "toggle_favorite flips the favorite flag" do
+    patch toggle_favorite_bookmark_url(@bookmark)
+    assert @bookmark.reload.favorite?
+
+    patch toggle_favorite_bookmark_url(@bookmark)
+    assert_not @bookmark.reload.favorite?
+  end
+
+  test "archive hides and unarchive restores a bookmark" do
+    patch archive_bookmark_url(@bookmark)
+    assert @bookmark.reload.archived?
+
+    patch unarchive_bookmark_url(@bookmark)
+    assert_not @bookmark.reload.archived?
+  end
+
+  test "cannot visit another user's bookmark" do
+    get visit_bookmark_url(bookmarks(:two))
+    assert_response :not_found
+  end
+
   test "cannot see another user's bookmark" do
     get bookmark_url(bookmarks(:two))
     assert_response :not_found

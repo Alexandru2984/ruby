@@ -1,5 +1,5 @@
 class BookmarksController < ApplicationController
-  before_action :set_bookmark, only: %i[ show edit update destroy ]
+  before_action :set_bookmark, only: %i[ show edit update destroy visit toggle_favorite archive unarchive ]
 
   # GET /bookmarks or /bookmarks.json
   def index
@@ -56,6 +56,34 @@ class BookmarksController < ApplicationController
       format.html { redirect_to bookmarks_path, notice: "Bookmark was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
     end
+  end
+
+  # GET /bookmarks/1/visit — counts the click-through, then sends the browser on.
+  def visit
+    @bookmark.register_visit!
+    redirect_to @bookmark.url, allow_other_host: true
+  end
+
+  # PATCH /bookmarks/1/toggle_favorite
+  def toggle_favorite
+    @bookmark.update!(favorite: !@bookmark.favorite?)
+
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: turbo_stream.replace(@bookmark) }
+      format.html { redirect_back fallback_location: bookmarks_path, status: :see_other }
+    end
+  end
+
+  # PATCH /bookmarks/1/archive
+  def archive
+    @bookmark.archive!
+    redirect_back fallback_location: bookmarks_path, status: :see_other, notice: "Bookmark archived."
+  end
+
+  # PATCH /bookmarks/1/unarchive
+  def unarchive
+    @bookmark.unarchive!
+    redirect_back fallback_location: bookmarks_path(filter: "archived"), status: :see_other, notice: "Bookmark restored."
   end
 
   private
