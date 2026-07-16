@@ -1,0 +1,26 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "d26964f2bd394ec44f44a26399493ea727c9edb2595cbf560c96de683a8de409",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/bookmarks_controller.rb",
+      "line": 86,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.user.bookmarks.find(params.expect(:id)).url, :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "BookmarksController",
+        "method": "visit"
+      },
+      "user_input": "params.expect(:id)",
+      "confidence": "Weak",
+      "note": "Intentional: /bookmarks/:id/visit redirects to the stored bookmark URL after counting the click-through. The URL is validated to be http(s)-only at write time and always belongs to the signed-in user."
+    }
+  ],
+  "updated": "2026-07-16 18:42:00 +0000",
+  "brakeman_version": "8.0.4"
+}
