@@ -49,7 +49,7 @@ class BookmarkFlowsTest < ApplicationSystemTestCase
 
     fill_in "email_address", with: users(:one).email_address
     fill_in "password", with: "wrong-password"
-    click_on "Sign in"
+    click_button "Sign in"
 
     assert_text "Try another email address or password"
   end
