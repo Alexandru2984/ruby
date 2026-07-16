@@ -68,6 +68,18 @@ class BookmarksController < ApplicationController
     end
   end
 
+  # GET /bookmarks/export.{json,csv,html} — downloads all of the user's bookmarks.
+  def export
+    bookmarks = Current.user.bookmarks.includes(:tags).newest_first
+    basename = "bookmarks-#{Date.current.iso8601}"
+
+    respond_to do |format|
+      format.json { send_data BookmarkExport.to_json(bookmarks), filename: "#{basename}.json", type: :json }
+      format.csv  { send_data BookmarkExport.to_csv(bookmarks), filename: "#{basename}.csv", type: :csv }
+      format.html { send_data BookmarkExport.to_netscape_html(bookmarks), filename: "#{basename}.html", type: :html }
+    end
+  end
+
   # GET /bookmarks/1/visit — counts the click-through, then sends the browser on.
   def visit
     @bookmark.register_visit!

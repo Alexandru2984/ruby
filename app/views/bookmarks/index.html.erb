@@ -27,6 +27,13 @@
     <% if params[:tag].present? %>
       <span class="rounded-full px-3 py-1 bg-blue-50 text-blue-700">tag: <%= params[:tag] %> <%= link_to "×", bookmarks_path(filter: params[:filter], q: params[:q]), class: "font-bold" %></span>
     <% end %>
+    <span class="ml-auto text-gray-500">
+      <%= link_to "Import", new_import_path, class: "underline hover:no-underline" %>
+      · Export:
+      <%= link_to "HTML", export_bookmarks_path(format: :html), class: "underline hover:no-underline" %>
+      <%= link_to "JSON", export_bookmarks_path(format: :json), class: "underline hover:no-underline" %>
+      <%= link_to "CSV", export_bookmarks_path(format: :csv), class: "underline hover:no-underline" %>
+    </span>
   </div>
 
   <div id="bookmarks" class="min-w-full divide-y divide-gray-200 space-y-5">

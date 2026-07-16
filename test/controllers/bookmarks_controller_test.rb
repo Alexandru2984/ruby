@@ -154,6 +154,26 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", bookmark_path(bookmarks(:one)), count: 0
   end
 
+  test "export downloads only the current user's bookmarks" do
+    get export_bookmarks_url(format: :json)
+    assert_response :success
+    assert_match "attachment", response.headers["Content-Disposition"]
+
+    urls = JSON.parse(response.body).map { |row| row["url"] }
+    assert_includes urls, bookmarks(:one).url
+    assert_not_includes urls, bookmarks(:two).url
+  end
+
+  test "export supports csv and netscape html formats" do
+    get export_bookmarks_url(format: :csv)
+    assert_response :success
+    assert_includes response.body, bookmarks(:one).url
+
+    get export_bookmarks_url(format: :html)
+    assert_response :success
+    assert_includes response.body, "NETSCAPE-Bookmark-file-1"
+  end
+
   test "index paginates" do
     25.times { |i| users(:one).bookmarks.create!(url: "https://example.com/page-#{i}") }
 
