@@ -3,6 +3,14 @@ require "test_helper"
 class BookmarksControllerTest < ActionDispatch::IntegrationTest
   setup do
     @bookmark = bookmarks(:one)
+    sign_in_as users(:one)
+  end
+
+  test "redirects to sign in when unauthenticated" do
+    sign_out
+
+    get bookmarks_url
+    assert_redirected_to new_session_url
   end
 
   test "should get index" do
