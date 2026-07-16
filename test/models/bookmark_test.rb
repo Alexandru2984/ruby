@@ -86,6 +86,30 @@ class BookmarkTest < ActiveSupport::TestCase
     assert_empty @user.bookmarks.tagged_with("missing")
   end
 
+  test "search matches title, url and description case-insensitively" do
+    bookmark = @user.bookmarks.create!(url: "https://example.com/search", title: "Postgres Tips", description: "Sharding guide")
+
+    assert_includes @user.bookmarks.search("postgres"), bookmark
+    assert_includes @user.bookmarks.search("SHARDING"), bookmark
+    assert_includes @user.bookmarks.search("example.com/search"), bookmark
+    assert_empty @user.bookmarks.search("nomatch-xyz")
+  end
+
+  test "search treats LIKE wildcards literally" do
+    bookmark = @user.bookmarks.create!(url: "https://example.com/wild", title: "100% legit")
+
+    assert_includes @user.bookmarks.search("100%"), bookmark
+    assert_empty @user.bookmarks.search("%%%")
+  end
+
+  test "sorted_by supports the documented sort keys and falls back to newest" do
+    Bookmark::SORTS.each do |key|
+      assert_nothing_raised { @user.bookmarks.sorted_by(key).to_a }
+    end
+
+    assert_equal @user.bookmarks.newest_first.to_a, @user.bookmarks.sorted_by("bogus").to_a
+  end
+
   test "register_visit! increments visits without touching updated_at" do
     bookmark = bookmarks(:one)
     original_updated_at = bookmark.updated_at

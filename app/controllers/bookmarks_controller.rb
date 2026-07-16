@@ -3,8 +3,18 @@ class BookmarksController < ApplicationController
 
   # GET /bookmarks or /bookmarks.json
   def index
-    @bookmarks = Current.user.bookmarks.newest_first.includes(:tags)
-    @bookmarks = @bookmarks.tagged_with(params[:tag]) if params[:tag].present?
+    scope = Current.user.bookmarks.includes(:tags)
+
+    scope = case params[:filter]
+    when "archived"  then scope.archived
+    when "favorites" then scope.active.favorites
+    else scope.active
+    end
+
+    scope = scope.tagged_with(params[:tag]) if params[:tag].present?
+    scope = scope.search(params[:q]) if params[:q].present?
+
+    @pagy, @bookmarks = pagy(scope.sorted_by(params[:sort]))
   end
 
   # GET /bookmarks/1 or /bookmarks/1.json

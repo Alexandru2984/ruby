@@ -126,4 +126,42 @@ class BookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", bookmark_path(bookmarks(:one))
     assert_select "a[href=?]", bookmark_path(bookmarks(:two)), count: 0
   end
+
+  test "index searches by query" do
+    match = users(:one).bookmarks.create!(url: "https://example.com/kubernetes", title: "K8s handbook")
+
+    get bookmarks_url(q: "kubernetes")
+    assert_response :success
+    assert_select "a[href=?]", bookmark_path(match)
+    assert_select "a[href=?]", bookmark_path(bookmarks(:one)), count: 0
+  end
+
+  test "index hides archived bookmarks by default and shows them under the archived filter" do
+    @bookmark.archive!
+
+    get bookmarks_url
+    assert_select "a[href=?]", bookmark_path(@bookmark), count: 0
+
+    get bookmarks_url(filter: "archived")
+    assert_select "a[href=?]", bookmark_path(@bookmark)
+  end
+
+  test "index filters favorites" do
+    favorite = users(:one).bookmarks.create!(url: "https://example.com/fav", favorite: true)
+
+    get bookmarks_url(filter: "favorites")
+    assert_select "a[href=?]", bookmark_path(favorite)
+    assert_select "a[href=?]", bookmark_path(bookmarks(:one)), count: 0
+  end
+
+  test "index paginates" do
+    25.times { |i| users(:one).bookmarks.create!(url: "https://example.com/page-#{i}") }
+
+    get bookmarks_url
+    assert_response :success
+    assert_select "nav[aria-label=Pagination]"
+
+    get bookmarks_url(page: 2)
+    assert_response :success
+  end
 end

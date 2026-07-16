@@ -36,6 +36,23 @@ class Bookmark < ApplicationRecord
   scope :active, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }
 
+  SORTS = %w[newest oldest title most_visited].freeze
+
+  # Case-insensitive substring match across title, url and description.
+  def self.search(query)
+    q = "%#{sanitize_sql_like(query.to_s.strip)}%"
+    where("bookmarks.title LIKE :q ESCAPE '\\' OR bookmarks.url LIKE :q ESCAPE '\\' OR bookmarks.description LIKE :q ESCAPE '\\'", q: q)
+  end
+
+  def self.sorted_by(key)
+    case key
+    when "oldest"       then order(created_at: :asc, id: :asc)
+    when "title"        then order(Arel.sql("title COLLATE NOCASE ASC"), id: :asc)
+    when "most_visited" then order(visits_count: :desc, id: :desc)
+    else newest_first
+    end
+  end
+
   def archived?
     archived_at.present?
   end

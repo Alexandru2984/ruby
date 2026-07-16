@@ -10,6 +10,25 @@
     <%= link_to "New bookmark", new_bookmark_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
   </div>
 
+  <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+    <%= form_with url: bookmarks_path, method: :get, class: "flex flex-1 gap-2" do |form| %>
+      <%= form.search_field :q, value: params[:q], placeholder: "Search bookmarks…", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 w-full" %>
+      <%= form.hidden_field :tag, value: params[:tag] %>
+      <%= form.hidden_field :filter, value: params[:filter] %>
+      <%= form.select :sort, options_for_select([ [ "Newest", "newest" ], [ "Oldest", "oldest" ], [ "Title", "title" ], [ "Most visited", "most_visited" ] ], params[:sort]), {}, class: "shadow-sm rounded-md border border-gray-400 px-3 py-2" %>
+      <%= form.submit "Search", class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 font-medium cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <div class="mt-4 flex gap-2 text-sm font-medium">
+    <%= link_to "All", bookmarks_path(tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter].blank? ? "bg-blue-600 text-white" : "bg-gray-100 hover:bg-gray-50"] %>
+    <%= link_to "Favorites", bookmarks_path(filter: "favorites", tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter] == "favorites" ? "bg-blue-600 text-white" : "bg-gray-100 hover:bg-gray-50"] %>
+    <%= link_to "Archived", bookmarks_path(filter: "archived", tag: params[:tag], q: params[:q]), class: ["rounded-full px-3 py-1", params[:filter] == "archived" ? "bg-blue-600 text-white" : "bg-gray-100 hover:bg-gray-50"] %>
+    <% if params[:tag].present? %>
+      <span class="rounded-full px-3 py-1 bg-blue-50 text-blue-700">tag: <%= params[:tag] %> <%= link_to "×", bookmarks_path(filter: params[:filter], q: params[:q]), class: "font-bold" %></span>
+    <% end %>
+  </div>
+
   <div id="bookmarks" class="min-w-full divide-y divide-gray-200 space-y-5">
     <% if @bookmarks.any? %>
       <% @bookmarks.each do |bookmark| %>
@@ -26,4 +45,6 @@
       <p class="text-center my-10">No bookmarks found.</p>
     <% end %>
   </div>
+
+  <%= render "shared/pagination", pagy: @pagy %>
 </div>
