@@ -38,6 +38,23 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "signups can be disabled via DISABLE_SIGNUPS" do
+    ENV["DISABLE_SIGNUPS"] = "1"
+
+    get new_registration_url
+    assert_redirected_to new_session_url
+
+    assert_no_difference("User.count") do
+      post registration_url, params: { user: { email_address: "locked@example.com", password: "s3curepass", password_confirmation: "s3curepass" } }
+    end
+    assert_redirected_to new_session_url
+
+    get new_session_url
+    assert_select "a[href=?]", new_registration_path, count: 0
+  ensure
+    ENV.delete("DISABLE_SIGNUPS")
+  end
+
   test "rejects duplicate email address" do
     assert_no_difference("User.count") do
       post registration_url, params: { user: { email_address: users(:one).email_address, password: "s3curepass", password_confirmation: "s3curepass" } }
