@@ -27,15 +27,26 @@ class LinkCheckerTest < ActiveSupport::TestCase
     end
   end
 
-  test "404 and 500 are broken with the code recorded" do
-    with_responses(Net::HTTP::Head => Net::HTTPNotFound.new("1.1", "404", "Not Found")) do
+  test "404 and 500 on both verbs are broken with the code recorded" do
+    with_responses(Net::HTTP::Head => Net::HTTPNotFound.new("1.1", "404", "Not Found"),
+                   Net::HTTP::Get => Net::HTTPNotFound.new("1.1", "404", "Not Found")) do
       result = LinkChecker.check("https://example.com/gone")
       assert_not result.ok?
       assert_equal 404, result.code
     end
 
-    with_responses(Net::HTTP::Head => Net::HTTPInternalServerError.new("1.1", "500", "Boom")) do
+    with_responses(Net::HTTP::Head => Net::HTTPInternalServerError.new("1.1", "500", "Boom"),
+                   Net::HTTP::Get => Net::HTTPInternalServerError.new("1.1", "500", "Boom")) do
       assert_not LinkChecker.check("https://example.com").ok?
+    end
+  end
+
+  test "servers that mishandle HEAD but serve GET count as alive" do
+    with_responses(Net::HTTP::Head => Net::HTTPBadGateway.new("1.1", "502", "Bad Gateway"),
+                   Net::HTTP::Get => Net::HTTPOK.new("1.1", "200", "OK")) do
+      result = LinkChecker.check("https://example.com/head-502")
+      assert result.ok?
+      assert_equal 200, result.code
     end
   end
 

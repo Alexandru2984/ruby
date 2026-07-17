@@ -1,11 +1,13 @@
 require "net/http"
 
 # Checks whether a bookmarked URL still responds. Reuses UrlMetadata's SSRF
-# guard; a HEAD request is tried first, falling back to GET for servers that
-# reject HEAD. 2xx/3xx counts as alive; auth walls (401/403) and rate
-# limiting (429) are treated as alive too, since the link itself works.
+# guard. A HEAD request is tried first; on any dead-looking answer the check
+# is repeated with GET, since plenty of servers mishandle HEAD (405, 501 or
+# even 5xx) while serving GET fine. 2xx/3xx counts as alive; auth walls
+# (401/403) and rate limiting (429) are treated as alive too, since the link
+# itself works.
 class LinkChecker
-  ALIVE_STATUSES = [ 401, 403, 405, 429 ].freeze
+  ALIVE_STATUSES = [ 401, 403, 429 ].freeze
 
   Result = Struct.new(:status, :code, keyword_init: true) do
     def ok? = status == "ok"
@@ -17,19 +19,29 @@ class LinkChecker
       return broken unless uri.is_a?(URI::HTTP)
       return broken if UrlMetadata.blocked_host?(uri.host)
 
-      response = request(uri, Net::HTTP::Head)
-      response = request(uri, Net::HTTP::Get) if response.is_a?(Net::HTTPMethodNotAllowed) || response.is_a?(Net::HTTPNotImplemented)
+      head = begin
+        classify(request(uri, Net::HTTP::Head))
+      rescue *NETWORK_ERRORS
+        nil
+      end
+      return head if head&.ok?
 
-      code = response.code.to_i
-      alive = response.is_a?(Net::HTTPSuccess) || response.is_a?(Net::HTTPRedirection) || ALIVE_STATUSES.include?(code)
-
-      Result.new(status: alive ? "ok" : "broken", code: code)
-    rescue URI::InvalidURIError, Timeout::Error, SystemCallError, SocketError,
-           OpenSSL::SSL::SSLError, EOFError, Net::ProtocolError
+      classify(request(uri, Net::HTTP::Get))
+    rescue URI::InvalidURIError, *NETWORK_ERRORS
       broken
     end
 
     private
+      NETWORK_ERRORS = [ Timeout::Error, SystemCallError, SocketError,
+                         OpenSSL::SSL::SSLError, EOFError, Net::ProtocolError ].freeze
+
+      def classify(response)
+        code = response.code.to_i
+        alive = response.is_a?(Net::HTTPSuccess) || response.is_a?(Net::HTTPRedirection) || ALIVE_STATUSES.include?(code)
+
+        Result.new(status: alive ? "ok" : "broken", code: code)
+      end
+
       def request(uri, verb)
         Net::HTTP.start(uri.host, uri.port,
                         use_ssl: uri.scheme == "https",
