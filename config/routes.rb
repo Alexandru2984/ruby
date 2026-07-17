@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   end
   resource :import, only: %i[ new create ]
   resource :settings, only: :show
+  resource :stats, only: :show, controller: "stats"
   resource :api_token, only: %i[ create destroy ]
   resource :public_share, only: %i[ create destroy ]
   get "shared/:token" => "shared_bookmarks#show", as: :shared_bookmarks

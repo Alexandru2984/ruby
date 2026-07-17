@@ -40,7 +40,10 @@ fetched in the background, everything is tagged, searchable and yours.
 - **Bulk actions** — select any number of bookmarks and favorite, archive,
   restore or delete them in one go.
 - **Public sharing** — opt-in secret link (`/shared/:token`) exposing your
-  favorites read-only; rotate or disable the link at any time.
+  favorites read-only, with an RSS feed for subscribers; rotate or disable
+  the link at any time.
+- **Stats** — a personal dashboard: totals, monthly activity chart, top
+  tags and most-visited bookmarks.
 
 ## Stack
 

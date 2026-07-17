@@ -37,6 +37,26 @@ class SharedBookmarksControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "serves an rss feed of the shared favorites" do
+    get shared_bookmarks_url(token: @owner.public_token, format: :rss)
+
+    assert_response :success
+    assert_match %r{application/rss\+xml}, response.content_type
+    assert_includes response.body, "<title>Shared Favorite</title>"
+    assert_includes response.body, "<link>#{@favorite.url}</link>"
+    assert_not_includes response.body, bookmarks(:one).url
+  end
+
+  test "rss 404s for unknown tokens" do
+    get shared_bookmarks_url(token: "nope", format: :rss)
+    assert_response :not_found
+  end
+
+  test "html page advertises the rss feed" do
+    get shared_bookmarks_url(token: @owner.public_token)
+    assert_select "link[type='application/rss+xml']"
+  end
+
   test "disabled sharing kills the link" do
     token = @owner.public_token
     @owner.disable_public_sharing!

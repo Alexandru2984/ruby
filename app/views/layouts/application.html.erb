@@ -36,6 +36,7 @@
         <nav class="flex items-center gap-2 text-sm">
           <% if authenticated? %>
             <%= link_to "New bookmark", new_bookmark_path, class: "rounded-md px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+            <%= link_to "Stats", stats_path, class: "hidden sm:inline rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
             <%= link_to "Import", new_import_path, class: "hidden sm:inline rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
             <%= link_to "Settings", settings_path, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "rounded-md px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium cursor-pointer" %>

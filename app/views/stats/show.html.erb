@@ -1,0 +1,97 @@
+<% content_for :title, "Stats" %>
+
+<div class="w-full space-y-8">
+  <h1 class="font-bold text-3xl">Stats</h1>
+
+  <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <% [
+      [ "Bookmarks", @totals[:bookmarks], bookmarks_path ],
+      [ "Favorites", @totals[:favorites], bookmarks_path(filter: "favorites") ],
+      [ "Archived", @totals[:archived], bookmarks_path(filter: "archived") ],
+      [ "Broken links", @totals[:broken], bookmarks_path(filter: "broken") ],
+      [ "Tags", @totals[:tags], nil ],
+      [ "Total visits", @totals[:visits], nil ]
+    ].each do |label, value, path| %>
+      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+        <p class="text-2xl font-bold tabular-nums"><%= number_with_delimiter(value) %></p>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <% if path %>
+            <%= link_to label, path, class: "hover:text-blue-600 dark:hover:text-blue-400" %>
+          <% else %>
+            <%= label %>
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+    <h2 class="font-semibold text-lg">Added in the last 6 months</h2>
+
+    <% max = [ @monthly.map(&:last).max, 1 ].compact.max %>
+    <div class="mt-6 flex items-end gap-3 h-40" role="img" aria-label="Bookmarks added per month over the last 6 months">
+      <% @monthly.each do |month, count| %>
+        <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0" title="<%= month.strftime("%B %Y") %>: <%= pluralize(count, "bookmark") %>">
+          <% if count == max && count.positive? %>
+            <span class="text-xs font-medium text-zinc-600 dark:text-zinc-300 tabular-nums mb-1"><%= count %></span>
+          <% end %>
+          <div class="w-full max-w-12 rounded-t-[4px] bg-blue-600 dark:bg-blue-500" style="height: <%= count.positive? ? (count * 100.0 / max).round(1) : 0 %>%; min-height: <%= count.positive? ? 4 : 2 %>px; <%= "background-color: rgb(212 212 216 / 0.6);" if count.zero? %>"></div>
+          <span class="mt-2 text-xs text-zinc-500 dark:text-zinc-400"><%= month.strftime("%b") %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <details class="mt-4 text-sm">
+      <summary class="cursor-pointer text-zinc-500 dark:text-zinc-400">View as table</summary>
+      <table class="mt-2 w-full max-w-xs text-left">
+        <thead>
+          <tr class="text-zinc-500 dark:text-zinc-400">
+            <th class="py-1 font-medium">Month</th>
+            <th class="py-1 font-medium text-right">Added</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @monthly.each do |month, count| %>
+            <tr class="border-t border-zinc-100 dark:border-zinc-800">
+              <td class="py-1"><%= month.strftime("%B %Y") %></td>
+              <td class="py-1 text-right tabular-nums"><%= count %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </details>
+  </section>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+      <h2 class="font-semibold text-lg">Top tags</h2>
+      <% if @top_tags.any? %>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <% @top_tags.each do |tag| %>
+            <%= link_to bookmarks_path(tag: tag.name), class: "text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 rounded-full px-3 py-1.5 hover:bg-blue-100 dark:hover:bg-blue-900" do %>
+              <%= tag.name %> <span class="opacity-60 tabular-nums"><%= tag.bookmarks_count %></span>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No tags yet — add some when saving bookmarks.</p>
+      <% end %>
+    </section>
+
+    <section class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+      <h2 class="font-semibold text-lg">Most visited</h2>
+      <% if @most_visited.any? %>
+        <ol class="mt-4 space-y-2">
+          <% @most_visited.each do |bookmark| %>
+            <li class="flex items-baseline justify-between gap-3 text-sm">
+              <%= link_to bookmark.display_title, visit_bookmark_path(bookmark), target: "_blank", rel: "noopener", class: "truncate hover:text-blue-600 dark:hover:text-blue-400 font-medium" %>
+              <span class="shrink-0 text-zinc-500 dark:text-zinc-400 tabular-nums"><%= pluralize(bookmark.visits_count, "visit") %></span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No visits counted yet — open bookmarks from the app and they'll show up here.</p>
+      <% end %>
+    </section>
+  </div>
+</div>
